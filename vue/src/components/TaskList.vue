@@ -1,5 +1,6 @@
 <template>
   <div class="card">
+    <p>TaskList component loaded!</p>
     <div class="card-body p-0">
       <table class="table mb-0">
         <thead>
