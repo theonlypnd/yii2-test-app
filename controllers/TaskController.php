@@ -5,7 +5,6 @@ namespace app\controllers;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
-use yii\filters\auth\HttpBasicAuth;
 use yii\filters\VerbFilter;
 use yii\rest\ActiveController;
 use yii\web\BadRequestHttpException;
@@ -22,18 +21,7 @@ class TaskController extends ActiveController
         $behaviors = parent::behaviors();
 
         // Enforce JSON response already set globally.
-        // Add Basic Auth for admin-only actions
-        $behaviors['authenticator'] = [
-            'class' => HttpBasicAuth::class,
-            'only' => ['update', 'delete'],
-            'auth' => function ($username, $password) {
-                $user = Admin::findByUsername($username);
-                if ($user && $user->validatePassword($password)) {
-                    return $user;
-                }
-                return null;
-            },
-        ];
+        // Use session-based auth (Yii::$app->user) via AccessControl for admin-only actions
 
         // Access rules: guests can index, view, create; admin can update/delete
         $behaviors['access'] = [

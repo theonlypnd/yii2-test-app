@@ -10,6 +10,15 @@ use yii\web\Response;
 
 class SiteController extends Controller
 {
+    public function beforeAction($action)
+    {
+        // Disable CSRF validation for API-style endpoints used by the SPA
+        if (in_array($action->id, ['login', 'logout'])) {
+            $this->enableCsrfValidation = false;
+        }
+        return parent::beforeAction($action);
+    }
+
     public function actionIndex()
     {
         $this->layout = false;
@@ -43,5 +52,40 @@ class SiteController extends Controller
             'mimeType' => $mime,
             'inline' => true,
         ]);
+    }
+
+    public function actionAuthStatus()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $isGuest = Yii::$app->user->isGuest;
+        $identity = $isGuest ? null : Yii::$app->user->identity;
+        return [
+            'authenticated' => !$isGuest,
+            'username' => $identity ? $identity->username : null,
+        ];
+    }
+
+    public function actionLogin()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $model = new \app\models\LoginForm();
+        $model->load(Yii::$app->request->post(), '');
+        if ($model->login()) {
+            return [
+                'ok' => true,
+                'username' => Yii::$app->user->identity->username,
+            ];
+        }
+        return [
+            'ok' => false,
+            'errors' => $model->getErrors(),
+        ];
+    }
+
+    public function actionLogout()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        Yii::$app->user->logout();
+        return ['ok' => true];
     }
 }

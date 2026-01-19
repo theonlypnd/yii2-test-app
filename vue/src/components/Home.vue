@@ -28,20 +28,20 @@
       @view="viewTask"
     />
 
-    <div class="mt-3 d-flex justify-content-end">
+    <div class="mt-3 mb-4 d-flex justify-content-end">
       <Pagination :current-page="page" :total-pages="totalPages" @change="changePage" />
     </div>
 
     <!-- Modal overlay for viewing task details -->
     <div
       v-if="viewingTask"
-      class="position-fixed top-0 start-0 w-100 h-100"
+      class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
       style="background: rgba(0,0,0,0.5); z-index: 1050;"
       @click.self="closeModal"
     >
       <div
         class="bg-white rounded shadow"
-        style="width: 90vw; max-width: 1200px; margin: 5vh auto; padding: 16px;"
+        style="width: 90vw; max-width: 1200px; padding: 16px;"
       >
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="mb-0">Task Details</h5>
@@ -72,13 +72,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, inject } from 'vue'
 import { getTasks, createTask, updateTask } from '../api/tasks.js'
 import TaskForm from '../components/TaskForm.vue'
 import TaskList from '../components/TaskList.vue'
 import Pagination from '../components/Pagination.vue'
 
-const props = defineProps({ isAdmin: { type: Boolean, default: false } })
+const isAdmin = inject('isAdmin', ref(false))
 
 const tasks = ref([])
 const page = ref(1)
@@ -136,7 +136,7 @@ async function handleCreate(form) {
 }
 
 async function editTask(task) {
-  if (!props.isAdmin) return
+  if (!isAdmin || !isAdmin.value) return
   const newText = window.prompt('Edit task text:', task.text || '')
   if (newText === null) return
   const payload = { text: newText }

@@ -65,6 +65,10 @@ $config = [
             'rules' => [
                 '' => 'site/index',
                 'assets/<path:.+>' => 'site/asset',
+                // Explicit routes for SPA auth endpoints so they are not shadowed by catch-all
+                'site/auth-status' => 'site/auth-status',
+                'site/login' => 'site/login',
+                'site/logout' => 'site/logout',
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => ['task'],
@@ -75,7 +79,8 @@ $config = [
                     ],
                 ],
 
-                '<path:(?!api/).+>' => 'site/index',
+                // Catch-all for SPA routes, excluding API and Site controller endpoints
+                '<path:(?!api/|site/).+>' => 'site/index',
             ],
         ],
 
