@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TaskForm @submit="handleCreate" />
+    <TaskForm ref="taskForm" @submit="handleCreate" />
 
     <div class="d-flex justify-content-between align-items-center mb-2">
       <div>
@@ -19,7 +19,7 @@
     </div>
 
     <TaskList
-      :tasks="tasks"
+      :tasks="displayTasks"
       :sort-field="sortField"
       :sort-order="sortOrder"
       :is-admin="isAdmin"
@@ -35,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { getTasks, createTask, updateTask } from '../api/tasks.js'
 import TaskForm from '../components/TaskForm.vue'
 import TaskList from '../components/TaskList.vue'
@@ -72,9 +72,15 @@ function setOrder(order) {
 }
 
 async function handleCreate(form) {
-  await createTask(form)
-  page.value = 1
-  await fetchTasks()
+  try {
+    await createTask(form)
+    page.value = 1
+    await fetchTasks()
+    if (taskForm.value && taskForm.value.reset) taskForm.value.reset()
+  } catch (e) {
+    const errs = extractErrors(e)
+    if (taskForm.value && taskForm.value.setServerErrors) taskForm.value.setServerErrors(errs)
+  }
 }
 
 async function editTask(task) {
@@ -92,4 +98,36 @@ function viewTask(task) {
 
 onMounted(fetchTasks)
 watch([page, sortField, sortOrder], fetchTasks)
+
+const taskForm = ref(null)
+
+function extractErrors(error) {
+  const result = {}
+  const data = error && error.response && error.response.data
+  if (!data) return result
+  const source = data.errors || data
+  const fields = ['username', 'email', 'text', 'image']
+  fields.forEach((f) => {
+    const v = source && source[f]
+    if (Array.isArray(v) && v.length) result[f] = String(v[0])
+    else if (typeof v === 'string') result[f] = v
+  })
+  if (!Object.keys(result).length && (data.message || data.error)) {
+    result._error = data.message || data.error
+  }
+  return result
+}
+
+function truncate(val, max) {
+  if (typeof val !== 'string') return val
+  return val.length > max ? val.slice(0, max) + '…' : val
+}
+
+const displayTasks = computed(() => {
+  return tasks.value.map(t => ({
+    ...t,
+    username: truncate(t?.username ?? '', 30),
+    email: truncate(t?.email ?? '', 30),
+  }))
+})
 </script>

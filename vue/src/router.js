@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import TaskList from './components/TaskList.vue';
+import Home from './components/Home.vue';
 
 const routes = [
-  { path: '/', component: TaskList },
+  { path: '/', component: Home },
 ];
 
 export default createRouter({
