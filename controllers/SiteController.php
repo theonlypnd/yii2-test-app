@@ -13,14 +13,19 @@ class SiteController extends Controller
     public function actionIndex()
     {
         $this->layout = false;
-        $distPath = Yii::getAlias('@webroot/spa');
-        $indexFile = $distPath . '/index.html';
+            $distPath = Yii::getAlias('@webroot/spa');
+            $indexFile = $distPath . '/index.html';
 
-        if (!file_exists($indexFile)) {
-            throw new NotFoundHttpException('Vue SPA build not found.');
-        }
+            if (!file_exists($indexFile)) {
+                throw new NotFoundHttpException('Vue SPA build not found.');
+            }
 
-        return Yii::$app->response->sendFile($indexFile);
+            // Ensure raw HTML response despite global JSON default
+            Yii::$app->response->format = Response::FORMAT_RAW;
+            return Yii::$app->response->sendFile($indexFile, null, [
+                'mimeType' => 'text/html',
+                'inline' => true,
+            ]);
     }
 
     public function actionAsset($path)

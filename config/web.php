@@ -69,6 +69,7 @@ $config = [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => ['task'],
                     'pluralize' => true,
+                    'prefix' => 'api',
                     'extraPatterns' => [
                         'OPTIONS' => 'options',
                     ],
