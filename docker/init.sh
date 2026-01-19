@@ -1,0 +1,35 @@
+#!/usr/bin/env sh
+set -e
+
+APP_DIR=/app
+INSTALLED_FILE=$APP_DIR/INSTALLED
+
+echo "Ensuring writable directories"
+
+mkdir -p runtime web/assets web/uploads
+chown -R www-data:www-data runtime web/assets web/uploads
+chmod -R 775 runtime web/assets web/uploads
+
+echo "Waiting for MySQL..."
+
+until mysql -h"$DB_HOST" -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" -e "SELECT 1" >/dev/null 2>&1; do
+  echo "Waiting for MySQL..."
+  sleep 2
+done
+
+if [ -f "$INSTALLED_FILE" ]; then
+  echo "ℹ Application already installed — skipping bootstrap"
+  exit 0
+fi
+
+echo "Installing composer dependencies..."
+composer install --no-interaction --prefer-dist
+
+echo "Fixing permissions..."
+chown -R www-data:www-data runtime web/assets
+
+echo "Running migrations..."
+php yii migrate --interactive=0
+
+touch INSTALLED
+echo "Installation complete."

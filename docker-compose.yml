@@ -1,9 +1,63 @@
-version: '2'
 services:
   php:
-    image: yiisoftware/yii2-php:7.4-apache
-    volumes:
-      - ~/.composer-docker/cache:/root/.composer/cache:delegated
-      - ./:/app:delegated
+    image: yiisoftware/yii2-php:8.2-fpm-nginx
     ports:
-      - '8000:80'
+      - "8000:80"
+    volumes:
+      - ./:/app:delegated
+      - ~/.composer-docker/cache:/root/.composer/cache:delegated
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u${DB_USER} -p${DB_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  node:
+    image: node:24-alpine
+    container_name: frontend_builder
+    working_dir: /app/vue
+    volumes:
+      - ./:/app
+    command: sh -c "npm install && npm run build && tail -f /dev/null"
+
+  init:
+    image: yiisoftware/yii2-php:8.2-fpm-nginx
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - ~/.composer-docker/cache:/root/.composer/cache
+    environment:
+      DB_HOST: mysql
+      DB_NAME: yii2_db
+      DB_USER: yii2_user
+      DB_PASSWORD: yii2_pass
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: sh docker/init.sh
+    restart: "no"
+
+volumes:
+  mysql-data:

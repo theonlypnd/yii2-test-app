@@ -1,0 +1,16 @@
+{
+  "name": "yii2-vue-tasks",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "vue": "^3.4.0",
+    "bootstrap": "^5.3.2",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

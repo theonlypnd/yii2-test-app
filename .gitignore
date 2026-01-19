@@ -34,3 +34,11 @@ tests/_support/_generated
 
 #vagrant folder
 /.vagrant
+
+/web/dist/
+/web/uploads/
+/web/assets/
+/vue/node_modules/
+/vue/dist/
+
+INSTALLED
