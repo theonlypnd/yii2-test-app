@@ -31,6 +31,43 @@
     <div class="mt-3 d-flex justify-content-end">
       <Pagination :current-page="page" :total-pages="totalPages" @change="changePage" />
     </div>
+
+    <!-- Modal overlay for viewing task details -->
+    <div
+      v-if="viewingTask"
+      class="position-fixed top-0 start-0 w-100 h-100"
+      style="background: rgba(0,0,0,0.5); z-index: 1050;"
+      @click.self="closeModal"
+    >
+      <div
+        class="bg-white rounded shadow"
+        style="width: 90vw; max-width: 1200px; margin: 5vh auto; padding: 16px;"
+      >
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Task Details</h5>
+          <button class="btn btn-sm btn-outline-secondary" @click="closeModal">Close</button>
+        </div>
+        <div class="row g-3 align-items-start">
+          <div v-if="viewingTask.image" class="col-md-3">
+            <img :src="viewingTask.image" alt="Task image" width="160" height="160" style="object-fit: cover;" />
+          </div>
+          <div :class="viewingTask.image ? 'col-md-9' : 'col-12'">
+            <div class="mb-2 d-flex align-items-center gap-2">
+              <strong class="mb-0">Username:</strong>
+              <span>{{ truncatePreview(viewingTask.username, 50) }}</span>
+            </div>
+            <div class="mb-2 d-flex align-items-center gap-2">
+              <strong class="mb-0">Email:</strong>
+              <span>{{ truncatePreview(viewingTask.email, 50) }}</span>
+            </div>
+            <div class="mb-2">
+              <strong>Text:</strong>
+              <div class="border rounded p-2" style="white-space: pre-wrap; word-break: break-word; line-height: 1.5; max-height: 7.5em; overflow-y: auto;">{{ viewingTask.text }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -48,6 +85,7 @@ const page = ref(1)
 const totalPages = ref(1)
 const sortField = ref('status')
 const sortOrder = ref('desc')
+const viewingTask = ref(null)
 
 async function fetchTasks() {
   const res = await getTasks({ page: page.value, sort: sortField.value, order: sortOrder.value })
@@ -93,7 +131,8 @@ async function editTask(task) {
 }
 
 function viewTask(task) {
-  alert(task.text || '')
+  const original = tasks.value.find(t => String(t.id) === String(task.id)) || task
+  viewingTask.value = original
 }
 
 onMounted(fetchTasks)
@@ -127,6 +166,16 @@ function extractErrors(error) {
     result._error = data.message || data.error
   }
   return result
+}
+
+function closeModal() {
+  viewingTask.value = null
+}
+
+// 100-char truncation for modal/preview labels
+function truncatePreview(val, max = 100) {
+  if (typeof val !== 'string') return val
+  return val.length > max ? val.slice(0, max) + '…' : val
 }
 
 function truncate(val, max) {
