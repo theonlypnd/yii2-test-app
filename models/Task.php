@@ -10,6 +10,8 @@ use yii\web\UploadedFile;
 
 class Task extends ActiveRecord
 {
+    public const MAX_IMAGE_WIDTH = 320;
+    public const MAX_IMAGE_HEIGHT = 240;
     /**
      * @var UploadedFile|null
      */
@@ -120,8 +122,8 @@ class Task extends ActiveRecord
             return false;
         }
 
-        $maxW = 320;
-        $maxH = 240;
+        $maxW = self::MAX_IMAGE_WIDTH;
+        $maxH = self::MAX_IMAGE_HEIGHT;
         $newW = $width;
         $newH = $height;
 

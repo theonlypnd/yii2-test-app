@@ -23,10 +23,10 @@ class TaskController extends ActiveController
         // Enforce JSON response already set globally.
         // Use session-based auth (Yii::$app->user) via AccessControl for admin-only actions
 
-        // Access rules: guests can index, view, create; admin can update/delete
+        // Access rules: guests can index, view, create; admin can update
         $behaviors['access'] = [
             'class' => AccessControl::class,
-            'only' => ['index', 'view', 'create', 'update', 'delete', 'preview'],
+            'only' => ['index', 'view', 'create', 'update', 'preview'],
             'rules' => [
                 [
                     'allow' => true,
@@ -35,7 +35,7 @@ class TaskController extends ActiveController
                 ],
                 [
                     'allow' => true,
-                    'actions' => ['update', 'delete'],
+                    'actions' => ['update'],
                     'roles' => ['@'],
                 ],
             ],
@@ -49,7 +49,6 @@ class TaskController extends ActiveController
                 'view' => ['GET', 'OPTIONS'],
                 'create' => ['POST', 'OPTIONS'],
                 'update' => ['PUT', 'PATCH', 'OPTIONS'],
-                'delete' => ['DELETE', 'OPTIONS'],
                 'preview' => ['POST', 'OPTIONS'],
             ],
         ];
