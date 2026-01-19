@@ -24,7 +24,7 @@
       :sort-order="sortOrder"
       :is-admin="isAdmin"
       @sort-field="onSortField"
-      @edit="editTask"
+      @save="saveInline"
       @view="viewTask"
     />
 
@@ -135,13 +135,19 @@ async function handleCreate(form) {
   }
 }
 
-async function editTask(task) {
+async function saveInline(update) {
   if (!isAdmin || !isAdmin.value) return
-  const newText = window.prompt('Edit task text:', task.text || '')
-  if (newText === null) return
-  const payload = { text: newText }
-  await updateTask(task.id, payload)
-  await fetchTasks()
+  try {
+    const payload = {}
+    if (typeof update.text !== 'undefined') payload.text = update.text
+    if (typeof update.is_done !== 'undefined') payload.is_done = !!update.is_done
+    await updateTask(update.id, payload)
+    await fetchTasks()
+  } catch (e) {
+    // Optionally surface error; keeping it simple
+    console.error('Update failed', e)
+    alert('Failed to save changes. Please try again.')
+  }
 }
 
 function viewTask(task) {
