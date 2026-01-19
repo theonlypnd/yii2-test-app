@@ -23,7 +23,7 @@
       :sort-field="sortField"
       :sort-order="sortOrder"
       :is-admin="isAdmin"
-      @sort-field="setSort"
+      @sort-field="onSortField"
       @edit="editTask"
       @view="viewTask"
     />
@@ -110,6 +110,12 @@ function changePage(p) {
 }
 
 function setSort(field) {
+  sortField.value = field
+}
+
+function onSortField(field) {
+  // Toggle order when clicking table header and set the field
+  sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
   sortField.value = field
 }
 
