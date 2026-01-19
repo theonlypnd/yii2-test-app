@@ -12,10 +12,19 @@ chmod -R 775 runtime web/assets web/uploads
 
 echo "Waiting for MySQL..."
 
-until mysql -h"$DB_HOST" -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" -e "SELECT 1" >/dev/null 2>&1; do
-  echo "Waiting for MySQL..."
+until php -r "
+try {
+    new PDO('mysql:host=' . getenv('DB_HOST') . ';dbname=' . getenv('DB_NAME'), getenv('DB_USER'), getenv('DB_PASSWORD'));
+    exit(0);
+} catch (Exception \$e) {
+    exit(1);
+}
+"
+do
   sleep 2
 done
+
+echo "MySQL is ready"
 
 if [ -f "$INSTALLED_FILE" ]; then
   echo "ℹ Application already installed — skipping bootstrap"

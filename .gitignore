@@ -38,6 +38,7 @@ tests/_support/_generated
 /web/dist/
 /web/uploads/
 /web/assets/
+/web/spa/assets/
 /vue/node_modules/
 /vue/dist/
 
