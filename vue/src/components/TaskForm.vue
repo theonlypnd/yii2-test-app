@@ -32,7 +32,7 @@
           </div>
           <div class="col-12">
             <label class="form-label">Text</label>
-            <textarea class="form-control" :class="{ 'is-invalid': errors.text }" rows="3" v-model.trim="text" required></textarea>
+            <textarea class="form-control" :class="{ 'is-invalid': errors.text }" rows="3" v-model.trim="text" @blur="onTextBlur" required></textarea>
             <div v-if="errors.text" class="invalid-feedback">{{ errors.text }}</div>
           </div>
           <div class="col-md-6">
@@ -57,11 +57,11 @@
               <div :class="previewUrl ? 'col-md-9' : 'col-12'">
                 <div class="mb-2 d-flex align-items-center gap-2">
                   <strong class="mb-0">Username:</strong>
-                  <span>{{ truncatePreview(username, 60) }}</span>
+                  <span>{{ truncatePreview(username, 50) }}</span>
                 </div>
                 <div class="mb-2 d-flex align-items-center gap-2">
                   <strong class="mb-0">Email:</strong>
-                  <span>{{ truncatePreview(email, 60) }}</span>
+                  <span>{{ truncatePreview(email, 50) }}</span>
                 </div>
                 <div class="mb-2">
                   <strong>Text:</strong>
@@ -212,9 +212,15 @@ function onFieldBlur(field) {
   }
 }
 
+function onTextBlur() {
+  if (text.value !== '') {
+    errors.text = ''
+  }
+}
+
 defineExpose({ reset, setServerErrors })
 
-function truncatePreview(val, max = 60) {
+function truncatePreview(val, max = 50) {
   if (typeof val !== 'string') return val
   return val.length > max ? val.slice(0, max) + '…' : val
 }

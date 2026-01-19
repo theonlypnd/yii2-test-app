@@ -105,13 +105,24 @@ function extractErrors(error) {
   const result = {}
   const data = error && error.response && error.response.data
   if (!data) return result
-  const source = data.errors || data
-  const fields = ['username', 'email', 'text', 'image']
-  fields.forEach((f) => {
-    const v = source && source[f]
-    if (Array.isArray(v) && v.length) result[f] = String(v[0])
-    else if (typeof v === 'string') result[f] = v
-  })
+  const source = (data && data.errors !== undefined) ? data.errors : data
+
+  if (Array.isArray(source)) {
+    // Handle array of { field, message } objects from backend
+    source.forEach((item) => {
+      const field = item && (item.field || item.attribute || item.name)
+      const message = item && (item.message || item.error || item.msg)
+      if (field && message && !result[field]) result[field] = String(message)
+    })
+  } else if (source && typeof source === 'object') {
+    // Handle object-shaped errors: { field: [messages] } or { field: 'message' }
+    const fields = ['username', 'email', 'text', 'image']
+    fields.forEach((f) => {
+      const v = source[f]
+      if (Array.isArray(v) && v.length) result[f] = String(v[0])
+      else if (typeof v === 'string') result[f] = v
+    })
+  }
   if (!Object.keys(result).length && (data.message || data.error)) {
     result._error = data.message || data.error
   }
