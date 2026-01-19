@@ -88,12 +88,20 @@ const sortOrder = ref('desc')
 const viewingTask = ref(null)
 
 async function fetchTasks() {
-  const res = await getTasks({ page: page.value, sort: sortField.value, order: sortOrder.value })
+  const serverSort = sortField.value === 'status' ? 'is_done' : sortField.value
+  const res = await getTasks({ page: page.value, sort: serverSort, order: sortOrder.value })
   const data = res.data || {}
   const items = Array.isArray(data) ? data : (data.tasks || data.items || data.data || [])
   tasks.value = items
-  const total = data.total ?? data.totalCount ?? (data.pagination ? data.pagination.total : undefined)
-  totalPages.value = data.pages ?? (total ? Math.max(1, Math.ceil(total / 3)) : 1)
+  const headers = res.headers || {}
+  const pageCount = parseInt(headers['x-pagination-page-count'] || headers['X-Pagination-Page-Count'])
+  const current = parseInt(headers['x-pagination-current-page'] || headers['X-Pagination-Current-Page'])
+  if (Number.isFinite(pageCount)) totalPages.value = Math.max(1, pageCount)
+  else {
+    const total = data.total ?? data.totalCount ?? (data.pagination ? data.pagination.total : undefined)
+    totalPages.value = data.pages ?? (total ? Math.max(1, Math.ceil(total / 3)) : 1)
+  }
+  if (Number.isFinite(current)) page.value = current
 }
 
 function changePage(p) {

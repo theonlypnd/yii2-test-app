@@ -6,8 +6,9 @@ const api = axios.create({
   }
 })
 
-export function getTasks({ page = 1, sort = 'status', order = 'desc' } = {}) {
-  return api.get('/api/tasks', { params: { page, sort, order } })
+export function getTasks({ page = 1, sort = 'is_done', order = 'desc' } = {}) {
+  const sortParam = order === 'desc' ? `-${sort}` : `${sort}`
+  return api.get('/api/tasks', { params: { page, sort: sortParam } })
 }
 
 export function createTask(formData) {
